@@ -89,6 +89,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
+    // Allow typing numbers only for phone, but don't block deletion
     if (name === 'phone' && !/^\d*$/.test(value)) return;
 
     setFormData(prev => {
@@ -113,14 +114,15 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
     if (!formData.fullName.trim()) err.fullName = 'Vui lòng nhập họ và tên';
     
+    // STRICT PHONE CHECK: 10-11 digits
     if (!formData.phone.trim()) err.phone = 'Vui lòng nhập số điện thoại';
-    else if (!/(84|0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone)) err.phone = 'SĐT không hợp lệ (10 số)';
+    else if (!/^(0[3|5|7|8|9])+([0-9]{8})\b/.test(formData.phone)) err.phone = 'SĐT không hợp lệ (VD: 090...)';
 
+    // STRICT EMAIL CHECK
     if (!formData.email.trim()) err.email = 'Vui lòng nhập email'; 
-    else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) err.email = 'Email không đúng định dạng';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) err.email = 'Email không đúng định dạng';
     
     // --- Date Validation ---
-    // Date of Birth
     if (formData.dob) {
         if (formData.dob > today) err.dob = 'Ngày sinh không được ở tương lai';
     }
@@ -145,7 +147,6 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
     // Resignation Date
     if (formData.resignationDate && formData.startDate) {
-        // Validation: Resignation cannot be earlier than start date
         if (formData.resignationDate < formData.startDate) {
             err.resignationDate = 'Ngày nghỉ việc không được sớm hơn ngày vào làm';
         }
@@ -220,7 +221,7 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <FormInput index={1} label="Mã Nhân Viên" name="employeeCode" value={formData.employeeCode} onChange={handleChange} onKeyDown={handleKeyDown} required error={errors.employeeCode} placeholder="Nhập mã NV..." />
                     <FormInput index={2} label="Họ và Tên" name="fullName" value={formData.fullName} onChange={handleChange} onKeyDown={handleKeyDown} required error={errors.fullName} />
-                    {/* Date Input with max constraint */}
+                    {/* Date Input with Calendar Icon */}
                     <FormInput index={3} label="Ngày Sinh" name="dob" type="date" value={formData.dob} onChange={handleChange} onKeyDown={handleKeyDown} error={errors.dob} max={today} />
                     <FormInput index={4} label="Giới Tính" name="gender" value={formData.gender} onChange={handleChange} onKeyDown={handleKeyDown} options={GENDER_OPTIONS} />
                 </div>
