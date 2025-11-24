@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { Calendar } from 'lucide-react';
 
 interface FormInputProps {
   label: string;
@@ -24,14 +25,14 @@ export const FormInput: React.FC<FormInputProps> = ({
 }) => {
   const baseClasses = "w-full px-3 py-2 bg-white border rounded-md text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-cadovina-500 focus:border-cadovina-500 disabled:bg-gray-100 disabled:text-gray-500";
   const borderClass = error ? "border-red-500" : "border-gray-300";
-  
-  // Improve UX for date input: Click input to show picker
-  const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    if (type === 'date' && !disabled) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleIconClick = () => {
+    if (type === 'date' && !disabled && inputRef.current) {
       try {
-        (e.target as HTMLInputElement).showPicker();
+        inputRef.current.showPicker();
       } catch (error) {
-        // Fallback for browsers not supporting showPicker
+        // Fallback
       }
     }
   };
@@ -57,22 +58,34 @@ export const FormInput: React.FC<FormInputProps> = ({
           {options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
         </select>
       ) : (
-        <input 
-            id={name} 
-            name={name} 
-            type={type} 
-            value={value} 
-            onChange={onChange} 
-            onKeyDown={onKeyDown} 
-            onClick={handleClick}
-            data-index={index} 
-            placeholder={placeholder} 
-            required={required} 
-            disabled={disabled} 
-            min={min}
-            max={max}
-            className={`${baseClasses} ${borderClass} ${type === 'date' ? 'cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer' : ''}`} 
-        />
+        <div className="relative">
+            <input 
+                ref={inputRef}
+                id={name} 
+                name={name} 
+                type={type} 
+                value={value} 
+                onChange={onChange} 
+                onKeyDown={onKeyDown} 
+                data-index={index} 
+                placeholder={placeholder} 
+                required={required} 
+                disabled={disabled} 
+                min={min}
+                max={max}
+                className={`${baseClasses} ${borderClass} ${type === 'date' ? 'pr-10' : ''}`} 
+            />
+            {type === 'date' && !disabled && (
+                <button
+                    type="button"
+                    onClick={handleIconClick}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cadovina-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                    tabIndex={-1}
+                >
+                    <Calendar size={16} />
+                </button>
+            )}
+        </div>
       )}
       {error && <span className="mt-1 text-xs text-red-500 italic">{error}</span>}
     </div>
