@@ -38,15 +38,43 @@ export const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
   useEffect(() => { if (notification) { const timer = setTimeout(() => setNotification(null), 3000); return () => clearTimeout(timer); } }, [notification]);
 
-  const renderDeptOptions = () => {
-    if (departments.length > 0 && typeof departments[0] === 'string') return (departments as string[]).map(d => <option key={d} value={d}>{d}</option>);
+    const renderDeptOptions = () => {
+    // Trường hợp truyền vào mảng string đơn giản
+    if (departments.length > 0 && typeof departments[0] === "string") {
+      return (departments as string[]).map((d) => (
+        <option key={d} value={d}>
+          {d}
+        </option>
+      ));
+    }
+
+    // Trường hợp là cây Department
     const depts = departments as Department[];
-    const renderNode = (dept: Department, level: number) => {
-       const children = depts.filter(d => d.parentId === dept.id);
-       return [<option key={dept.id} value={dept.name}>{"\u00A0\u00A0".repeat(level) + (level > 0 ? "└─ " : "") + dept.name}</option>, ...children.map(child => renderNode(child, level + 1))];
+
+    // ⚠️ THÊM KIỂU TRẢ VỀ RÕ RÀNG => HẾT TS7023 / TS7024
+    const renderNode = (dept: Department, level: number): JSX.Element[] => {
+      const children = depts.filter((d) => d.parentId === dept.id);
+
+      const currentOption = (
+        <option key={dept.id} value={dept.name}>
+          {"\u00A0\u00A0".repeat(level) +
+            (level > 0 ? "└─ " : "") +
+            dept.name}
+        </option>
+      );
+
+      const childOptions = children.flatMap((child) =>
+        renderNode(child, level + 1)
+      );
+
+      return [currentOption, ...childOptions];
     };
-    return depts.filter(d => !d.parentId).map(root => renderNode(root, 0));
+
+    return depts
+      .filter((d) => !d.parentId)
+      .flatMap((root) => renderNode(root, 0));
   };
+
 
   const posOptions = useMemo(() => (positions.length && typeof positions[0] === 'string' ? positions as string[] : (positions as Position[]).map(p => p.name)), [positions]);
 
