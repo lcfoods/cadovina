@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
-    Search, FileSpreadsheet, Plus, Filter, MoreHorizontal, 
-    Edit, Trash2, Phone, Mail, MapPin, Building2 
+    Search, FileSpreadsheet, Plus, Filter, 
+    Edit, Trash2, Phone, Mail, Building2 
 } from 'lucide-react';
 import { Employee, EmployeeStatus } from '../types';
 import { DEPARTMENTS, POSITIONS, STATUS_OPTIONS } from '../constants';
@@ -18,41 +18,96 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
     const [filterDept, setFilterDept] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
 
-    // --- Export Excel Logic ---
+    // --- Export Excel Logic (HTML Table Format) ---
     const handleExportExcel = () => {
-        // 1. Define Headers
+        // Define Headers
         const headers = [
             "Mã NV", "Họ Tên", "Giới Tính", "Ngày Sinh", "SĐT", "Email", 
-            "CCCD", "Phòng Ban", "Chức Vụ", "Ngày Vào Làm", 
-            "Lương Cơ Bản", "Trạng Thái", "Địa Chỉ"
+            "CCCD/CMND", "Phòng Ban", "Chức Vụ", "Ngày Vào Làm", 
+            "Lương Cơ Bản", "Trạng Thái", "Địa Chỉ Chi Tiết"
         ];
 
-        // 2. Map Data
-        const data = employees.map(e => [
-            e.employeeCode,
-            `"${e.fullName}"`, // Quote strings to handle commas
-            e.gender,
-            e.dob,
-            `'${e.phone}`, // Force string for phone numbers in Excel
-            e.email,
-            `'${e.identityCard}`,
-            `"${e.department}"`,
-            `"${e.position}"`,
-            e.startDate,
-            e.salary,
-            e.status,
-            `"${e.street}, ${e.ward}, ${e.district}, ${e.province}"`
-        ]);
+        // Construct HTML Table for Excel
+        // Using HTML allows us to use CSS for borders and 'mso-number-format' to keep leading zeros
+        const tableHTML = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="UTF-8">
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>Danh sách nhân viên</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    th { 
+                        background-color: #f2f2f2; 
+                        border: 1px solid #000000; 
+                        font-weight: bold; 
+                        text-align: center; 
+                        padding: 10px;
+                        height: 40px;
+                        vertical-align: middle;
+                    }
+                    td { 
+                        border: 1px solid #000000; 
+                        padding: 5px; 
+                        vertical-align: middle;
+                    }
+                    .text-mode { mso-number-format:"\\@"; } /* Forces Excel to treat as text (keeps leading zeros) */
+                    .currency { mso-number-format:"#,##0"; }
+                    .center { text-align: center; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <thead>
+                        <tr>
+                            ${headers.map(h => `<th>${h}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${employees.map(e => `
+                            <tr>
+                                <td class="text-mode">${e.employeeCode}</td>
+                                <td>${e.fullName}</td>
+                                <td class="center">${e.gender}</td>
+                                <td class="center">${e.dob}</td>
+                                <td class="text-mode">${e.phone}</td>
+                                <td>${e.email}</td>
+                                <td class="text-mode">${e.identityCard}</td>
+                                <td>${e.department}</td>
+                                <td>${e.position}</td>
+                                <td class="center">${e.startDate}</td>
+                                <td class="currency">${e.salary}</td>
+                                <td>${e.status}</td>
+                                <td>${e.street ? e.street + ', ' : ''}${e.ward}, ${e.district}, ${e.province}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
 
-        // 3. Create CSV Content with BOM for UTF-8 (Vietnamese) support
-        const csvContent = "\uFEFF" + [headers.join(","), ...data.map(row => row.join(","))].join("\n");
-
-        // 4. Create Download Link
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        // Create Blob
+        const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' });
         const url = URL.createObjectURL(blob);
+        
+        // Trigger Download
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `DS_NhanVien_Cadovina_${new Date().toISOString().split('T')[0]}.csv`);
+        // Using .xls extension ensures Excel opens it correctly as a spreadsheet
+        link.setAttribute("download", `DS_NhanVien_Cadovina_${new Date().toISOString().split('T')[0]}.xls`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -141,7 +196,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                 </div>
             </div>
 
-            {/* Table Area */}
+            {/* Table Area - ĐÂY LÀ ĐOẠN CODE HIỂN THỊ DANH SÁCH */}
             <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div className="overflow-auto flex-1">
                     <table className="w-full text-sm text-left border-collapse">
@@ -210,7 +265,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                             {filteredEmployees.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">
-                                        Không tìm thấy nhân viên nào.
+                                        Không tìm thấy nhân viên nào phù hợp với bộ lọc.
                                     </td>
                                 </tr>
                             )}
