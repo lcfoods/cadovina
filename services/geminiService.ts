@@ -64,11 +64,9 @@ export const extractEmployeeInfo = async (
       },
     });
 
-    // ⚠️ Fix TS2345: luôn đảm bảo là string trước khi parse
-    const textResponse: string =
-      response.text ??
-      response.response?.text?.() ??
-      "{}";
+    const textResponse = (
+      response.text ?? response.response?.text?.() ?? "{}"
+    ) as string;
 
     return JSON.parse(textResponse);
   } catch (error) {
