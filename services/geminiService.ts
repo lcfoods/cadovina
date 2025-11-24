@@ -1,24 +1,26 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Employee } from "../types";
 
-// Fix: Safely access import.meta.env using optional chaining (?.).
-// This prevents the "Cannot read properties of undefined" error if the environment is not standard Vite.
-// @ts-ignore - Suppress TS error if client types are missing
-const API_KEY = import.meta.env?.VITE_API_KEY || "YOUR_API_KEY_HERE"; 
+// Ép kiểu để chắc chắn API_KEY là string
+const API_KEY = (import.meta.env?.VITE_API_KEY as string) || "YOUR_API_KEY_HERE";
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-export const extractEmployeeInfo = async (text: string, fileBase64?: string, mimeType?: string): Promise<Partial<Employee> | null> => {
+export const extractEmployeeInfo = async (
+  text: string,
+  fileBase64?: string,
+  mimeType?: string
+): Promise<Partial<Employee> | null> => {
   try {
-    const model = "gemini-2.5-flash"; 
+    const model = "gemini-2.5-flash";
     const parts: any[] = [];
-    
+
     if (fileBase64 && mimeType) {
-        parts.push({
-            inlineData: {
-                data: fileBase64,
-                mimeType: mimeType
-            }
-        });
+      parts.push({
+        inlineData: {
+          data: fileBase64,
+          mimeType: mimeType,
+        },
+      });
     }
 
     const promptText = `Bạn là một chuyên gia nhân sự (HR). Nhiệm vụ của bạn là trích xuất thông tin ứng viên từ tài liệu CV/Hồ sơ hoặc văn bản mô tả được cung cấp dưới đây thành định dạng JSON chuẩn.
@@ -34,8 +36,8 @@ export const extractEmployeeInfo = async (text: string, fileBase64?: string, mim
 
     parts.push({ text: promptText });
 
-    const response = await ai.models.generateContent({
-      model: model,
+    const response: any = await ai.models.generateContent({
+      model,
       contents: { parts },
       config: {
         responseMimeType: "application/json",
@@ -62,9 +64,13 @@ export const extractEmployeeInfo = async (text: string, fileBase64?: string, mim
       },
     });
 
-    const text = response.text ?? ""; // hoặc response.text()
-    if (!text) return null;
-    return JSON.parse(text);
+    // ⚠️ Fix TS2345: luôn đảm bảo là string trước khi parse
+    const textResponse: string =
+      response.text ??
+      response.response?.text?.() ??
+      "{}";
+
+    return JSON.parse(textResponse);
   } catch (error) {
     console.error("Gemini Error:", error);
     return null;
