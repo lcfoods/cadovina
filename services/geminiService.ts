@@ -1,23 +1,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Employee } from "../types";
 
-// ---- FIX: Support both Vite (import.meta.env) and Cloudflare (global variables) ----
-let API_KEY: string = "YOUR_API_KEY_HERE";
-
-// Cloudflare injects variables into globalThis
-if (typeof globalThis !== "undefined" && (globalThis as any).VITE_API_KEY) {
-  API_KEY = (globalThis as any).VITE_API_KEY;
-}
-
-// Vite local env (import.meta.env)
-if (
-  typeof import.meta !== "undefined" &&
-  (import.meta as any).env &&
-  (import.meta as any).env.VITE_API_KEY
-) {
-  API_KEY = (import.meta as any).env.VITE_API_KEY;
-}
-// -------------------------------------------------------------------------------
+// Lấy API key: ưu tiên Vite (import.meta.env), rồi tới globalThis (Cloudflare), cuối cùng là fallback
+const API_KEY: string =
+  (((import.meta as any).env?.VITE_API_KEY as string | undefined) ??
+    ((globalThis as any)?.VITE_API_KEY as string | undefined) ??
+    "YOUR_API_KEY_HERE");
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
