@@ -2,7 +2,11 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Employee } from "../types";
 
 // Ép kiểu để chắc chắn API_KEY là string
-const API_KEY = (import.meta.env?.VITE_API_KEY as string) || "YOUR_API_KEY_HERE";
+// FIX for Vite + Cloudflare Pages (no TS error)
+const API_KEY =
+  (globalThis as any).VITE_API_KEY ||
+  (typeof import !== "undefined" && (import.meta as any).env?.VITE_API_KEY) ||
+  "YOUR_API_KEY_HERE";
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 export const extractEmployeeInfo = async (
