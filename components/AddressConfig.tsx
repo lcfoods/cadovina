@@ -173,7 +173,7 @@ export const AddressConfig: React.FC<AddressConfigProps> = ({
                   </td>
                 </tr>
               )}
-            </tbody>
+            </tbody>   
           </table>
         </div>
       </div>
