@@ -56,12 +56,10 @@ function App() {
   const [districts, setDistricts] =
     useState<LocationItem[]>(INITIAL_DISTRICTS);
   const [wards, setWards] = useState<LocationItem[]>(INITIAL_WARDS);
-  const [depts, setDepts] = useState<Department[] | string[]>(
-    INITIAL_DEPARTMENTS,
-  );
-  const [positions, setPositions] = useState<Position[] | string[]>(
-    INITIAL_POSITIONS,
-  );
+
+  // ❗ Quan trọng: depts & positions là Department[] / Position[] (KHÔNG phải union)
+  const [depts, setDepts] = useState<Department[]>(INITIAL_DEPARTMENTS);
+  const [positions, setPositions] = useState<Position[]>(INITIAL_POSITIONS);
 
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
@@ -118,7 +116,7 @@ function App() {
     updateAndSync('EMPLOYEES', newList, setEmployees);
   };
 
-  // --- Meta cho Breadcrumb & Header (giống Fast HRM / Misa) ---
+  // --- Meta cho Breadcrumb & Header ---
   const pageMeta = useMemo(() => {
     switch (view) {
       case 'dashboard':
@@ -225,7 +223,7 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-gray-50">
-        {/* Top bar giống HRM enterprise */}
+        {/* Top bar */}
         <header className="h-16 bg-white shadow-sm border-b flex items-center justify-between px-6 z-10">
           <div className="flex items-center gap-4">
             <button className="text-gray-500 hover:text-gray-700">
@@ -261,7 +259,7 @@ function App() {
           </div>
         </header>
 
-        {/* Header Section: breadcrumb + title (giống Fast HRM / Misa) */}
+        {/* Header Section: breadcrumb + title */}
         <section className="border-b bg-gray-50 px-6 py-3 flex items-center justify-between">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
@@ -270,7 +268,9 @@ function App() {
             <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
               {pageMeta.breadcrumb.map((item, idx) => (
                 <React.Fragment key={item + idx}>
-                  {idx > 0 && <ChevronRight size={12} className="text-gray-400" />}
+                  {idx > 0 && (
+                    <ChevronRight size={12} className="text-gray-400" />
+                  )}
                   <span
                     className={
                       idx === pageMeta.breadcrumb.length - 1
@@ -289,7 +289,7 @@ function App() {
           </div>
         </section>
 
-        {/* Main view container – mỗi lần chỉ render 1 màn hình */}
+        {/* Main view container – mỗi lần chỉ render 1 màn */}
         <div className="flex-1 overflow-auto bg-gray-100 p-4 md:p-6">
           {view === 'dashboard' && (
             <Dashboard
@@ -325,8 +325,8 @@ function App() {
                 provinces={provinces}
                 districts={districts}
                 wards={wards}
-                departments={depts as Department[]}
-                positions={positions as Position[]}
+                departments={depts}      // Department[]
+                positions={positions}    // Position[]
                 existingEmployees={employees}
               />
             </div>
@@ -339,8 +339,8 @@ function App() {
                 updateAndSync('CANDIDATES', d, setCandidates)
               }
               onPromoteToEmployee={handlePromote}
-              departments={depts as Department[]}
-              positions={positions as Position[]}
+              departments={depts}
+              positions={positions}
               existingEmployees={employees}
             />
           )}
@@ -357,11 +357,11 @@ function App() {
               }
               wards={wards}
               onUpdateWards={(d) => updateAndSync('WARDS', d, setWards)}
-              departments={depts as Department[]}
+              departments={depts}
               onUpdateDepartments={(d) =>
                 updateAndSync('DEPARTMENTS', d, setDepts)
               }
-              positions={positions as Position[]}
+              positions={positions}
               onUpdatePositions={(d) =>
                 updateAndSync('POSITIONS', d, setPositions)
               }
