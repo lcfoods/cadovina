@@ -15,7 +15,7 @@ const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; // <-- DÁN LINK 
 
 export const saveToGoogleSheet = async (type: string, data: any) => {
   // Bỏ qua nếu chưa cấu hình URL
-  if (!SCRIPT_URL || SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbzxDKqHQUH1g2KsHi8StMyZnV3KxwWoMHkbslRL6sOHTkUWDh2dML6YSYFXqZGdVJ6Zuw/exec")) {
+  if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
     console.warn("⚠️ Google Sheet Sync: Chưa cấu hình SCRIPT_URL trong services/googleSheetService.ts");
     return false;
   }
