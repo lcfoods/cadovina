@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Map, Briefcase, Network, ChevronRight, Edit, X, Save, FolderTree, CornerDownRight } from 'lucide-react';
 import { LocationItem, Department, Position } from '../types';
