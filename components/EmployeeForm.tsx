@@ -5,7 +5,7 @@ import { DEPARTMENTS, POSITIONS, STATUS_OPTIONS, GENDER_OPTIONS, INITIAL_PROVINC
 import { Employee, EmployeeStatus, Gender, LocationItem, Department, Position } from '../types';
 import { extractEmployeeInfo } from '../services/geminiService';
 
-interface EmployeeFormProps {
+interface EmployeeFormProps {     
   onSave: (employee: Employee) => void;
   onCancel: () => void;
   provinces?: LocationItem[];
