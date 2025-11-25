@@ -46,6 +46,7 @@ type View =
   | 'config';
 
 function App() {
+  const [depts, setDepts] = useState<Department[]>(INITIAL_DEPARTMENTS);
   const [view, setView] = useState<View>('dashboard');
 
   // Main Data States
