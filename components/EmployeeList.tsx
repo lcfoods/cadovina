@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
     Search, FileSpreadsheet, Plus, Filter, 
     Edit, Trash2, Phone, Mail, Building2 
@@ -14,66 +15,47 @@ interface EmployeeListProps {
 }
 
 export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, onAddNew, onDelete }) => {
-    const [searchTerm, setSearchTerm] = useState('');
+    // Debounce State
+    const [inputValue, setInputValue] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+    
     const [filterDept, setFilterDept] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
 
-    // --- Export Excel Logic (HTML Table Format) ---
-    const handleExportExcel = () => {
-        // Define Headers
-        const headers = [
-            "Mã NV", "Họ Tên", "Giới Tính", "Ngày Sinh", "SĐT", "Email", 
-            "CCCD/CMND", "Phòng Ban", "Chức Vụ", "Ngày Vào Làm", 
-            "Lương Cơ Bản", "Trạng Thái", "Địa Chỉ Chi Tiết"
-        ];
+    // Debounce Logic
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(inputValue);
+        }, 500); // 500ms delay
 
-        // Construct HTML Table for Excel
-        // Using HTML allows us to use CSS for borders and 'mso-number-format' to keep leading zeros
+        return () => clearTimeout(timer);
+    }, [inputValue]);
+
+    // Reset status filter when department changes to prevent invalid states
+    useEffect(() => {
+        setFilterStatus('');
+    }, [filterDept]);
+
+    const handleExportExcel = () => {
+        const headers = ["Mã NV", "Họ Tên", "Giới Tính", "Ngày Sinh", "SĐT", "Email", "CCCD/CMND", "Phòng Ban", "Chức Vụ", "Ngày Vào Làm", "Lương Cơ Bản", "Trạng Thái", "Địa Chỉ Chi Tiết"];
+        
+        // Tạo nội dung HTML cho Excel
         const tableHTML = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
             <head>
                 <meta charset="UTF-8">
-                <!--[if gte mso 9]>
-                <xml>
-                    <x:ExcelWorkbook>
-                        <x:ExcelWorksheets>
-                            <x:ExcelWorksheet>
-                                <x:Name>Danh sách nhân viên</x:Name>
-                                <x:WorksheetOptions>
-                                    <x:DisplayGridlines/>
-                                </x:WorksheetOptions>
-                            </x:ExcelWorksheet>
-                        </x:ExcelWorksheets>
-                    </x:ExcelWorkbook>
-                </xml>
-                <![endif]-->
                 <style>
                     table { border-collapse: collapse; width: 100%; }
-                    th { 
-                        background-color: #f2f2f2; 
-                        border: 1px solid #000000; 
-                        font-weight: bold; 
-                        text-align: center; 
-                        padding: 10px;
-                        height: 40px;
-                        vertical-align: middle;
-                    }
-                    td { 
-                        border: 1px solid #000000; 
-                        padding: 5px; 
-                        vertical-align: middle;
-                    }
-                    .text-mode { mso-number-format:"\\@"; } /* Forces Excel to treat as text (keeps leading zeros) */
-                    .currency { mso-number-format:"#,##0"; }
+                    th { background-color: #f2f2f2; border: 1px solid #000; font-weight: bold; text-align: center; padding: 10px; height: 40px; vertical-align: middle; }
+                    td { border: 1px solid #000; padding: 5px; vertical-align: middle; }
+                    .text-mode { mso-number-format:"\\@"; } /* Giữ số 0 ở đầu */
                     .center { text-align: center; }
                 </style>
             </head>
             <body>
                 <table>
                     <thead>
-                        <tr>
-                            ${headers.map(h => `<th>${h}</th>`).join('')}
-                        </tr>
+                        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
                     </thead>
                     <tbody>
                         ${employees.map(e => `
@@ -88,7 +70,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                                 <td>${e.department}</td>
                                 <td>${e.position}</td>
                                 <td class="center">${e.startDate}</td>
-                                <td class="currency">${e.salary}</td>
+                                <td>${e.salary}</td>
                                 <td>${e.status}</td>
                                 <td>${e.street ? e.street + ', ' : ''}${e.ward}, ${e.district}, ${e.province}</td>
                             </tr>
@@ -99,38 +81,48 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
             </html>
         `;
 
-        // Create Blob
         const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel' });
         const url = URL.createObjectURL(blob);
-        
-        // Trigger Download
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        // Using .xls extension ensures Excel opens it correctly as a spreadsheet
         link.setAttribute("download", `DS_NhanVien_Cadovina_${new Date().toISOString().split('T')[0]}.xls`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    // --- Filter Logic ---
+    // Calculate available statuses based on selected department
+    const availableStatuses = useMemo(() => {
+        if (!filterDept) return STATUS_OPTIONS;
+        
+        const statusesInDept = new Set(
+            employees
+                .filter(e => e.department === filterDept)
+                .map(e => e.status)
+        );
+        
+        // Filter the original constants to preserve order, but only include existing ones
+        return STATUS_OPTIONS.filter(status => statusesInDept.has(status));
+    }, [employees, filterDept]);
+
+    // Logic lọc dữ liệu (Uses debouncedSearchTerm)
     const filteredEmployees = useMemo(() => {
         return employees.filter(e => {
             const matchesSearch = 
-                e.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                e.employeeCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                e.phone.includes(searchTerm);
+                e.fullName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+                e.employeeCode.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                e.phone.includes(debouncedSearchTerm);
             const matchesDept = filterDept ? e.department === filterDept : true;
             const matchesStatus = filterStatus ? e.status === filterStatus : true;
             return matchesSearch && matchesDept && matchesStatus;
         });
-    }, [employees, searchTerm, filterDept, filterStatus]);
+    }, [employees, debouncedSearchTerm, filterDept, filterStatus]);
 
     const deptOptions = typeof DEPARTMENTS[0] === 'string' ? DEPARTMENTS as string[] : (DEPARTMENTS as any[]).map(d => d.name);
 
     return (
         <div className="h-full flex flex-col bg-gray-50 p-6">
-            {/* Header & Toolbar */}
+            {/* PHẦN HEADER MÀ BẠN ĐANG TÌM */}
             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-4">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                     <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
@@ -154,13 +146,13 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                     </div>
                 </div>
 
-                {/* Filters */}
+                {/* PHẦN BỘ LỌC */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                     <div className="md:col-span-4 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input 
-                            value={searchTerm}
-                            onChange={e => setSearchTerm(e.target.value)}
+                            value={inputValue}
+                            onChange={e => setInputValue(e.target.value)}
                             placeholder="Tìm kiếm theo tên, mã NV, SĐT..." 
                             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cadovina-500 focus:outline-none"
                         />
@@ -180,14 +172,15 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                             value={filterStatus} 
                             onChange={e => setFilterStatus(e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-cadovina-500 bg-white"
+                            disabled={availableStatuses.length === 0}
                         >
                             <option value="">-- Tất cả trạng thái --</option>
-                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                            {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                     </div>
                     <div className="md:col-span-2">
                         <button 
-                            onClick={() => {setSearchTerm(''); setFilterDept(''); setFilterStatus('');}}
+                            onClick={() => {setInputValue(''); setDebouncedSearchTerm(''); setFilterDept(''); setFilterStatus('');}}
                             className="w-full h-full px-3 py-2 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200 flex items-center justify-center gap-1"
                         >
                             <Filter size={14} /> Xóa lọc
@@ -196,7 +189,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                 </div>
             </div>
 
-            {/* Table Area - ĐÂY LÀ ĐOẠN CODE HIỂN THỊ DANH SÁCH */}
+            {/* PHẦN BẢNG DỮ LIỆU */}
             <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div className="overflow-auto flex-1">
                     <table className="w-full text-sm text-left border-collapse">
@@ -265,7 +258,7 @@ export const EmployeeList: React.FC<EmployeeListProps> = ({ employees, onEdit, o
                             {filteredEmployees.length === 0 && (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">
-                                        Không tìm thấy nhân viên nào phù hợp với bộ lọc.
+                                        Không tìm thấy nhân viên nào.
                                     </td>
                                 </tr>
                             )}
