@@ -4,7 +4,7 @@ export enum EmployeeStatus {
   RESIGNED = 'Đã nghỉ việc',
   LEAVE = 'Nghỉ thai sản/ốm',
 }
-
+    
 export enum Gender {
   MALE = 'Nam',
   FEMALE = 'Nữ',
