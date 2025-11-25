@@ -22,15 +22,13 @@ export const POSITIONS = [
   "Công Nhân",
 ];
 
-export const INITIAL_DEPARTMENTS: Department[] = DEPARTMENTS.map((name, index) => ({
-  id: String(index + 1),
-  name,
-}));
+const [depts, setDepts] = useState<Department[]>(
+  (INITIAL_DEPARTMENTS as Department[]) ?? []
+);
+const [positions, setPositions] = useState<Position[]>(
+  (INITIAL_POSITIONS as Position[]) ?? []
+);
 
-export const INITIAL_POSITIONS: Position[] = POSITIONS.map((name, index) => ({
-  id: String(index + 1),
-  name,
-}));
 
 export const STATUS_OPTIONS = [
   EmployeeStatus.ACTIVE,
