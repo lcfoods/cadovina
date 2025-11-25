@@ -69,20 +69,23 @@ function App() {
   const [depts, setDepts] = useState<Department[]>(
     INITIAL_DEPARTMENTS as Department[],
   );
-    // Sau:
-  // const [positions, setPositions] = useState<Position[]>(
-  //   INITIAL_POSITIONS as Position[],
-  // );
 
+  const [positions, setPositions] = useState<Position[]>(
+    INITIAL_POSITIONS as Position[],
+  );
+
+   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
+
+
+
+  // --- LOAD "CHỨC VỤ" TỪ GOOGLE SHEET KHI APP MỞ ---
   useEffect(() => {
-    // Khi app load, thử lấy dữ liệu Chức vụ từ Google Sheet
     const loadPositions = async () => {
       try {
         const remote = await fetchFromGoogleSheet('Chức vụ');
-        console.log('Remote positions from Sheet:', remote);
+        console.log('Remote positions from Google Sheet:', remote);
 
         if (Array.isArray(remote) && remote.length > 0) {
-          // Nếu trên sheet đã có dữ liệu chuẩn { id, name, ... } thì dùng luôn:
           setPositions(remote as Position[]);
         }
       } catch (err) {
@@ -94,7 +97,8 @@ function App() {
   }, []);
 
 
-  const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
+
+ 
 
    // --- Helper: Cập nhật State và Gửi Sheet ---
   function updateAndSync<T>(
