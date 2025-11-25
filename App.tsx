@@ -75,15 +75,16 @@ function App() {
 
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
-  // --- Helper: Cập nhật State và Gửi Sheet ---
-  const updateAndSync = <T,>(
+   // --- Helper: Cập nhật State và Gửi Sheet ---
+  function updateAndSync<T>(
     key: string,
     newData: T,
     setter: React.Dispatch<React.SetStateAction<T>>,
-  ) => {
+  ) {
     setter(newData);
     saveToGoogleSheet(key, newData);
-  };
+  }
+
 
   // --- Handlers ---
   const handleSaveEmp = (emp: Employee) => {
