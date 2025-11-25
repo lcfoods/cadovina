@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   LayoutDashboard,
   Settings,
@@ -36,7 +36,7 @@ import {
   RecruitmentStatus,
 } from './types';
 
-import { saveToGoogleSheet } from './services/googleSheetService';
+import { saveToGoogleSheet, fetchFromGoogleSheet  } from './services/googleSheetService';
 
 type View =
   | 'dashboard'
@@ -69,9 +69,30 @@ function App() {
   const [depts, setDepts] = useState<Department[]>(
     INITIAL_DEPARTMENTS as Department[],
   );
-  const [positions, setPositions] = useState<Position[]>(
-    INITIAL_POSITIONS as Position[],
-  );
+    // Sau:
+  // const [positions, setPositions] = useState<Position[]>(
+  //   INITIAL_POSITIONS as Position[],
+  // );
+
+  useEffect(() => {
+    // Khi app load, thử lấy dữ liệu Chức vụ từ Google Sheet
+    const loadPositions = async () => {
+      try {
+        const remote = await fetchFromGoogleSheet('Chức vụ');
+        console.log('Remote positions from Sheet:', remote);
+
+        if (Array.isArray(remote) && remote.length > 0) {
+          // Nếu trên sheet đã có dữ liệu chuẩn { id, name, ... } thì dùng luôn:
+          setPositions(remote as Position[]);
+        }
+      } catch (err) {
+        console.error('Lỗi load Chức vụ từ Google Sheet:', err);
+      }
+    };
+
+    loadPositions();
+  }, []);
+
 
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
