@@ -362,8 +362,7 @@ function App() {
                 updateAndSync('DEPARTMENTS', d, setDepts)
               }
               positions={positions}
-              onUpdatePositions={(d) =>
-                updateAndSync('POSITIONS', d, setPositions)
+              onUpdatePositions={(d) => updateAndSync('Chức vụ', d, setPositions)}
               }
             />
           )}
