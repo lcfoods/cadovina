@@ -5,7 +5,7 @@
  */
 
 // --- CẤU HÌNH LINK WEB APP GOOGLE SCRIPT ---
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxDKqHQUH1g2KsHi8StMyZnV3KxwWoMHkbslRL6sOHTkUWDh2dML6YSYFXqZGdVJ6Zuw/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsN0Ay11_5SyQmnbRx6kQNjyAlb90WhoccJXyGq6VHEJrBPStEDO8Qgtskk1CpgRANvg/exec"; 
 
 export const saveToGoogleSheet = async (type: string, data: any) => {
   if (!SCRIPT_URL || SCRIPT_URL.includes("1Q6G4NYNePP0zAQz6lPI2oJBpaRM0Ott90YaxfSGyKJ4")) {
