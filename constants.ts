@@ -11,28 +11,30 @@ export const DEPARTMENTS = [
   "Nhà Máy Sản Xuất",
 ];
 
-export const POSITIONS = [
-  "Giám Đốc",
-  "Trưởng Phòng",
-  "Phó Phòng",
-  "Trưởng Nhóm",
-  "Chuyên Viên",
-  "Nhân Viên",
-  "Thực Tập Sinh",
-  "Công Nhân",
+// Dữ liệu mẫu cho chức vụ (Mã + Tên)
+export const POSITIONS_DATA = [
+  { code: "GD", name: "Giám Đốc" },
+  { code: "TP", name: "Trưởng Phòng" },
+  { code: "PP", name: "Phó Phòng" },
+  { code: "TN", name: "Trưởng Nhóm" },
+  { code: "CV", name: "Chuyên Viên" },
+  { code: "NV", name: "Nhân Viên" },
+  { code: "TTS", name: "Thực Tập Sinh" },
+  { code: "CN", name: "Công Nhân" },
 ];
 
-export const INITIAL_DEPARTMENTS: Department[] = [
-  // điền data của bạn
-];
+export const POSITIONS = POSITIONS_DATA.map(p => p.name);
 
-export const INITIAL_POSITIONS: Position[] = [
-  // điền data của bạn
-];
+export const INITIAL_DEPARTMENTS: Department[] = DEPARTMENTS.map((name, index) => ({
+  id: String(index + 1),
+  name,
+}));
 
-// nếu có các constant khác thì export tiếp ở đây
-
-
+export const INITIAL_POSITIONS: Position[] = POSITIONS_DATA.map((p, index) => ({
+  id: String(index + 1),
+  code: p.code,
+  name: p.name,
+}));
 
 export const STATUS_OPTIONS = [
   EmployeeStatus.ACTIVE,
