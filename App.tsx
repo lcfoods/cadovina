@@ -357,11 +357,11 @@ function App() {
               }
               wards={wards}
               onUpdateWards={(d) => updateAndSync('WARDS', d, setWards)}
-              departments={depts}
+              departments={depts as Department[]}
               onUpdateDepartments={(d) =>
                 updateAndSync('DEPARTMENTS', d, setDepts)
               }
-              positions={positions}
+              positions={positions as Position[]}
               onUpdatePositions={(d) =>
                 updateAndSync('POSITIONS', d, setPositions)
               }
