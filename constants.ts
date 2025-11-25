@@ -22,9 +22,6 @@ export const POSITIONS = [
   "Công Nhân",
 ];
 
-// constants.ts
-import type { Department, Position } from "./types"; // nếu có
-
 export const INITIAL_DEPARTMENTS: Department[] = [
   // điền data của bạn
 ];
