@@ -22,12 +22,19 @@ export const POSITIONS = [
   "Công Nhân",
 ];
 
-const [depts, setDepts] = useState<Department[]>(
-  (INITIAL_DEPARTMENTS as Department[]) ?? []
-);
-const [positions, setPositions] = useState<Position[]>(
-  (INITIAL_POSITIONS as Position[]) ?? []
-);
+// constants.ts
+import type { Department, Position } from "./types"; // nếu có
+
+export const INITIAL_DEPARTMENTS: Department[] = [
+  // điền data của bạn
+];
+
+export const INITIAL_POSITIONS: Position[] = [
+  // điền data của bạn
+];
+
+// nếu có các constant khác thì export tiếp ở đây
+
 
 
 export const STATUS_OPTIONS = [
