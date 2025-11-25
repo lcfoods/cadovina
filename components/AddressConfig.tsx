@@ -179,4 +179,3 @@ export const AddressConfig: React.FC<AddressConfigProps> = ({
       </div>
     </div>
   );
-};
