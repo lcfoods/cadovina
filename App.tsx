@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { LayoutDashboard, UserPlus, Settings, Menu, Search, Bell, UserCheck, Users } from 'lucide-react';
 import { EmployeeForm } from './components/EmployeeForm';
@@ -7,6 +8,7 @@ import { CategoryConfig } from './components/CategoryConfig';
 import { RecruitmentManager } from './components/RecruitmentManager';
 import { INITIAL_EMPLOYEES, INITIAL_PROVINCES, INITIAL_DISTRICTS, INITIAL_WARDS, INITIAL_DEPARTMENTS, INITIAL_POSITIONS, INITIAL_CANDIDATES } from './constants';
 import { Employee, LocationItem, Department, Position, EmployeeStatus, Candidate, RecruitmentStatus } from './types';
+import { saveToGoogleSheet } from './services/googleSheetService';
 
 function App() {
   const [view, setView] = useState<'dashboard' | 'employee-list' | 'employee-form' | 'recruitment' | 'config'>('dashboard');
@@ -19,12 +21,25 @@ function App() {
   const [positions, setPositions] = useState(INITIAL_POSITIONS);
   const [selectedEmp, setSelectedEmp] = useState<Employee|null>(null);
 
+  // Hàm helper để cập nhật State + Gửi Sheet
+  const updateAndSync = (type: string, data: any, setter: React.Dispatch<React.SetStateAction<any>>) => {
+      setter(data);
+      saveToGoogleSheet(type, data);
+  };
+
   const handleSaveEmp = (emp: Employee) => {
-      setEmployees(prev => { 
-          const idx = prev.findIndex(e=>e.id===emp.id); 
-          if(idx>=0) { const n=[...prev];n[idx]=emp;return n; } 
-          return [...prev, emp]; 
-      });
+      let newEmployees = [];
+      const idx = employees.findIndex(e => e.id === emp.id);
+      if (idx >= 0) {
+          newEmployees = [...employees];
+          newEmployees[idx] = emp;
+      } else {
+          newEmployees = [...employees, emp];
+      }
+      
+      // Cập nhật và đồng bộ
+      updateAndSync('EMPLOYEES', newEmployees, setEmployees);
+      
       // Return to List view after saving
       setView('employee-list'); 
       setSelectedEmp(null);
@@ -32,12 +47,22 @@ function App() {
 
   const handlePromote = (c: Candidate, d: Partial<Employee>) => {
       const newEmp = { ...d, fullName: c.fullName, id: Date.now().toString(), status: EmployeeStatus.PROBATION } as Employee;
-      setEmployees([...employees, newEmp]);
-      setCandidates(candidates.map(x=>x.id===c.id?{...x,status:RecruitmentStatus.CONVERTED}:x));
+      const newEmpList = [...employees, newEmp];
+      updateAndSync('EMPLOYEES', newEmpList, setEmployees);
+
+      const newCandidateList = candidates.map(x => x.id === c.id ? { ...x, status: RecruitmentStatus.CONVERTED } : x);
+      updateAndSync('CANDIDATES', newCandidateList, setCandidates);
+      
+      alert("Đã chuyển hồ sơ thành công!");
   };
 
   const handleDeleteEmployee = (id: string) => {
-      setEmployees(prev => prev.filter(e => e.id !== id));
+      const newList = employees.filter(e => e.id !== id);
+      updateAndSync('EMPLOYEES', newList, setEmployees);
+  };
+
+  const handleUpdateCandidates = (newCandidates: Candidate[]) => {
+      updateAndSync('CANDIDATES', newCandidates, setCandidates);
   };
 
   return (
@@ -73,7 +98,7 @@ function App() {
             </button>
         </nav>
         <div className="p-4 bg-slate-800 text-xs text-slate-400 text-center">
-            v1.0.2 © 2024 LCFoods
+            v1.0.3 (Cloud Sync) © 2024 LCFoods
         </div>
       </aside>
       
@@ -134,7 +159,7 @@ function App() {
              {view === 'recruitment' && (
                 <RecruitmentManager 
                     candidates={candidates} 
-                    onUpdateCandidates={setCandidates} 
+                    onUpdateCandidates={handleUpdateCandidates} 
                     onPromoteToEmployee={handlePromote} 
                     departments={depts} 
                     positions={positions} 
@@ -144,11 +169,11 @@ function App() {
              
              {view === 'config' && (
                 <CategoryConfig 
-                    provinces={provinces} onUpdateProvinces={setProvinces} 
-                    districts={districts} onUpdateDistricts={setDistricts} 
-                    wards={wards} onUpdateWards={setWards} 
-                    departments={depts} onUpdateDepartments={setDepts} 
-                    positions={positions} onUpdatePositions={setPositions} 
+                    provinces={provinces} onUpdateProvinces={(d) => updateAndSync('PROVINCES', d, setProvinces)}
+                    districts={districts} onUpdateDistricts={(d) => updateAndSync('DISTRICTS', d, setDistricts)}
+                    wards={wards} onUpdateWards={(d) => updateAndSync('WARDS', d, setWards)}
+                    departments={depts} onUpdateDepartments={(d) => updateAndSync('DEPARTMENTS', d, setDepts)}
+                    positions={positions} onUpdatePositions={(d) => updateAndSync('POSITIONS', d, setPositions)}
                 />
              )}
         </div>
