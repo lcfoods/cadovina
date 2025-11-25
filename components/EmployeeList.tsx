@@ -5,7 +5,7 @@ import {
     Edit, Trash2, Phone, Mail, Building2 
 } from 'lucide-react';
 import { Employee, EmployeeStatus } from '../types';
-import { DEPARTMENTS, POSITIONS, STATUS_OPTIONS } from '../constants';
+import { DEPARTMENTS, STATUS_OPTIONS } from '../constants';
 
 interface EmployeeListProps {
     employees: Employee[];
