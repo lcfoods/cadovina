@@ -57,9 +57,8 @@ function App() {
     useState<LocationItem[]>(INITIAL_DISTRICTS);
   const [wards, setWards] = useState<LocationItem[]>(INITIAL_WARDS);
 
-  // ❗ Quan trọng: depts & positions là Department[] / Position[] (KHÔNG phải union)
-  const [depts, setDepts] = useState<Department[]>(INITIAL_DEPARTMENTS);
-  const [positions, setPositions] = useState<Position[]>(INITIAL_POSITIONS);
+  const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS);
+  const [positions, setPositions] = useState(INITIAL_POSITIONS);
 
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
