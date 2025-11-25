@@ -325,8 +325,8 @@ function App() {
                 provinces={provinces}
                 districts={districts}
                 wards={wards}
-                departments={depts}
-                positions={positions}
+                departments={depts as Department[]}
+                positions={positions as Position[]}
                 existingEmployees={employees}
               />
             </div>
@@ -339,8 +339,8 @@ function App() {
                 updateAndSync('CANDIDATES', d, setCandidates)
               }
               onPromoteToEmployee={handlePromote}
-              departments={depts}
-              positions={positions}
+              departments={depts as Department[]}
+              positions={positions as Position[]}
               existingEmployees={employees}
             />
           )}
