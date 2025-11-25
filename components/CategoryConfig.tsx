@@ -31,6 +31,19 @@ export const CategoryConfig: React.FC<CategoryConfigProps> = ({
   // Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const handleDeletePosition = (id: string) => {
+  const newList = positions.filter(p => p.id !== id);
+  onUpdatePositions(newList);  // 👈 CHỈ GỌI VỚI MẢNG MỚI
+};
+  const handleAddPosition = (newPos: Position) => {
+  const newList = [...positions, newPos];
+  onUpdatePositions(newList);
+};
+  const handleUpdatePosition = (updated: Position) => {
+  const newList = positions.map(p => p.id === updated.id ? updated : p);
+  onUpdatePositions(newList);
+};
+
   // Auto-select logic
   useEffect(() => {
     if (editingId) return; 
