@@ -1,43 +1,39 @@
 
 /**
- * Service kết nối Google Sheet thông qua Google Apps Script
- * 
- * HƯỚNG DẪN CÀI ĐẶT:
- * 1. Tạo Google Sheet > Extensions > Apps Script.
- * 2. Copy code Apps Script (đã cung cấp ở phần chat) vào file Code.gs.
- * 3. Deploy > New Deployment > Select type: Web App.
- * 4. Execute as: Me.
- * 5. Who has access: Anyone.
- * 6. Copy URL Web App (có đuôi /exec) và dán vào biến SCRIPT_URL dưới đây.
+ * Service kết nối Google Sheet
+ * Bạn cần tạo Google Apps Script (dạng Web App) và dán link vào biến SCRIPT_URL bên dưới.
  */
 
-const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"; // <-- DÁN LINK CỦA BẠN VÀO ĐÂY
+// --- CẤU HÌNH LINK WEB APP GOOGLE SCRIPT ---
+// Bước 1: Tạo Google Sheet -> Extensions -> Apps Script.
+// Bước 2: Copy code backend (tôi sẽ cung cấp ở phần hướng dẫn) vào.
+// Bước 3: Deploy -> New Deployment -> Web App -> Access: Anyone.
+// Bước 4: Copy URL (có đuôi /exec) dán vào đây.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxDKqHQUH1g2KsHi8StMyZnV3KxwWoMHkbslRL6sOHTkUWDh2dML6YSYFXqZGdVJ6Zuw/exec"; 
 
 export const saveToGoogleSheet = async (type: string, data: any) => {
-  // Bỏ qua nếu chưa cấu hình URL
-  if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
-    console.warn("⚠️ Google Sheet Sync: Chưa cấu hình SCRIPT_URL trong services/googleSheetService.ts");
+  // Nếu chưa thay link thì báo lỗi nhẹ ở console và bỏ qua
+  if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_SCRIPT_ID_HERE")) {
+    console.warn("⚠️ Google Sheet Sync: Chưa điền SCRIPT_URL trong services/googleSheetService.ts");
     return false;
   }
 
   try {
-    const payload = {
-      type: type, // Ví dụ: 'EMPLOYEES', 'POSITIONS', 'PROVINCES'
-      data: data
-    };
-
-    // Gửi request POST
-    // Lưu ý: Dùng mode 'no-cors' nếu gặp lỗi CORS chặn, nhưng tốt nhất là cấu hình Apps Script trả về JSONP hoặc text/plain
-    // Ở đây dùng Content-Type text/plain để tránh preflight request phức tạp của Google
+    // Sử dụng mode 'no-cors' để tránh lỗi chặn của trình duyệt khi gọi sang Google
+    // Lưu ý: 'no-cors' sẽ không trả về kết quả chi tiết, nhưng vẫn gửi dữ liệu đi được.
     await fetch(SCRIPT_URL, {
       method: "POST",
-      body: JSON.stringify(payload),
+      mode: "no-cors",
       headers: {
-        "Content-Type": "text/plain;charset=utf-8",
+        "Content-Type": "text/plain", // Dùng text/plain để tránh preflight OPTIONS request
       },
+      body: JSON.stringify({
+        type: type, // Ví dụ: 'EMPLOYEES', 'DEPARTMENTS'
+        data: data  // Dữ liệu cần lưu
+      })
     });
 
-    console.log(`✅ Đã đồng bộ ${type} lên Google Sheet`);
+    console.log(`✅ Đã gửi lệnh đồng bộ ${type} lên Google Sheet`);
     return true;
   } catch (error) {
     console.error("❌ Lỗi đồng bộ Google Sheet:", error);
