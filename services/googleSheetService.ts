@@ -29,7 +29,7 @@ export const saveToGoogleSheet = async (type: string, data: any) => {
 };
 
 export const fetchFromGoogleSheet = async (type: string) => {
-  if (!SCRIPT_URL || SCRIPT_URL.includes("YOUR_SCRIPT_ID_HERE")) return null;
+  if (!SCRIPT_URL || SCRIPT_URL.includes("1Q6G4NYNePP0zAQz6lPI2oJBpaRM0Ott90YaxfSGyKJ4")) return null;
 
   try {
     // Gọi GET request kèm tham số type
