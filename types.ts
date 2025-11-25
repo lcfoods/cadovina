@@ -46,6 +46,7 @@ export interface Department {
 
 export interface Position {
   id: string;
+  code: string; // Thêm mã chức vụ
   name: string;
 }
 
