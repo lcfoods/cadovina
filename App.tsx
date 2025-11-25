@@ -46,20 +46,32 @@ type View =
   | 'config';
 
 function App() {
-  const [depts, setDepts] = useState<Department[]>(INITIAL_DEPARTMENTS);
   const [view, setView] = useState<View>('dashboard');
 
   // Main Data States
-  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
-  const [candidates, setCandidates] = useState<Candidate[]>(INITIAL_CANDIDATES);
-  const [provinces, setProvinces] =
-    useState<LocationItem[]>(INITIAL_PROVINCES);
-  const [districts, setDistricts] =
-    useState<LocationItem[]>(INITIAL_DISTRICTS);
-  const [wards, setWards] = useState<LocationItem[]>(INITIAL_WARDS);
+  const [employees, setEmployees] = useState<Employee[]>(
+    INITIAL_EMPLOYEES as Employee[],
+  );
+  const [candidates, setCandidates] = useState<Candidate[]>(
+    INITIAL_CANDIDATES as Candidate[],
+  );
+  const [provinces, setProvinces] = useState<LocationItem[]>(
+    INITIAL_PROVINCES as LocationItem[],
+  );
+  const [districts, setDistricts] = useState<LocationItem[]>(
+    INITIAL_DISTRICTS as LocationItem[],
+  );
+  const [wards, setWards] = useState<LocationItem[]>(
+    INITIAL_WARDS as LocationItem[],
+  );
 
-  const [departments, setDepartments] = useState(INITIAL_DEPARTMENTS);
-  const [positions, setPositions] = useState(INITIAL_POSITIONS);
+  // Phòng ban & Chức vụ
+  const [depts, setDepts] = useState<Department[]>(
+    INITIAL_DEPARTMENTS as Department[],
+  );
+  const [positions, setPositions] = useState<Position[]>(
+    INITIAL_POSITIONS as Position[],
+  );
 
   const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
 
@@ -325,8 +337,8 @@ function App() {
                 provinces={provinces}
                 districts={districts}
                 wards={wards}
-                departments={depts}      // Department[]
-                positions={positions}    // Position[]
+                departments={depts}
+                positions={positions}
                 existingEmployees={employees}
               />
             </div>
@@ -357,15 +369,14 @@ function App() {
               }
               wards={wards}
               onUpdateWards={(d) => updateAndSync('WARDS', d, setWards)}
-              
               departments={depts}
               onUpdateDepartments={(d) =>
                 updateAndSync('DEPARTMENTS', d, setDepts)
               }
-              
               positions={positions}
-              onUpdatePositions={(d) => updateAndSync('Chức vụ', d, setPositions)}
-              
+              onUpdatePositions={(d) =>
+                updateAndSync('Chức vụ', d, setPositions)
+              }
             />
           )}
         </div>
